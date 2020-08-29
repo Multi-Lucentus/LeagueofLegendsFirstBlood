@@ -80,16 +80,22 @@ def getFirstBloodData(summoner_name, matchlist):
     # 100 requests every 2 minutes
     # Wait 5 seconds between every 20 requests
     counter = 0
+
+    print(summoner_name + "'s Matches (" + str(num_games) + ")")
+
     for matchId in matchlist:
         # Check the counter number
         if counter == 20:
-            time.sleep(5)
+            print("Sleeeep")
+            time.sleep(2)
             counter = 0
 
         # Make a request to get all of the information for that specific game
         url = RIOT_WEBSITE + "/lol/match/v4/matches/" + str(matchId) + "?api_key=" + api_key
         match_datas = makeRequest(url)
-            
+        
+        print("Match ID: " + str(matchId))
+
         # Get the data for that specific match
         match_data = json.loads(match_datas.text)
 
@@ -101,8 +107,10 @@ def getFirstBloodData(summoner_name, matchlist):
 
         for participant in participant_ids:
             player_data = participant["player"]
-            if player_data["summonerName"] is summoner_name:
+            if player_data["summonerName"] == summoner_name:
                 part_ID = participant["participantId"]
+
+        print("\tParticipant ID: " + str(part_ID))
 
         # Check what participant got first blood and see if that matches w/ the participant id for entered summoner
         for participant in participant_data:
@@ -111,6 +119,9 @@ def getFirstBloodData(summoner_name, matchlist):
                 # Check for first blood
                 stats = participant["stats"]
                 did_first_blood = stats["firstBloodKill"]
+
+                print("\tFirst Blood? " + str(did_first_blood))
+
                 if did_first_blood:
                     num_first_bloods += 1
 
