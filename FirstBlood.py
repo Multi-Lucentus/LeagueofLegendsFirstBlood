@@ -5,7 +5,6 @@ import time
 
 # Important constants
 RIOT_WEBSITE = "https://na1.api.riotgames.com"
-STATIC_WEBSITE = "http://static.developer.riotgames.com"
 
 
 # Classes
@@ -27,9 +26,6 @@ def makeRequest(stringRequest):
         # Check for issues with the response code
         if response.status_code != 200:
             if response.status_code == 400:
-                # Checks for the specific response code that too many requests have been made
-                # TODO: Gather the specific number of requests and sleep for needed number of seconds
-                time.sleep(5)
                 makeRequest(stringRequest)
             else:
                 raise RequestError
@@ -70,7 +66,58 @@ def getMatchIDList(summonerID):
         match_ids.append(match["gameId"])
     
     return match_ids
-    
+
+
+def getFirstBloodData(summoner_name, matchlist):
+    # Parameter should be a list of match IDs
+    # Function will go through each match (by ID) and figure out if the intended user got first blood or killed for first blood
+    num_games = len(matchlist)
+
+    num_first_bloods = 0
+
+    # Check the number of games and if we'll need to wait between requests
+    # Max requests is 20 requests every 1 second (prbly wont need to worry about) or 
+    # 100 requests every 2 minutes
+    # Wait 5 seconds between every 20 requests
+    counter = 0
+    for matchId in matchlist:
+        # Check the counter number
+        if counter == 20:
+            time.sleep(5)
+            counter = 0
+
+        # Make a request to get all of the information for that specific game
+        url = RIOT_WEBSITE + "/lol/match/v4/matches/" + str(matchId) + "?api_key=" + api_key
+        match_datas = makeRequest(url)
+            
+        # Get the data for that specific match
+        match_data = json.loads(match_datas.text)
+
+        # Now to determine who got first blood
+        participant_data = match_data["participants"]
+        participant_ids = match_data["participantIdentities"]
+
+        part_ID = 0
+
+        for participant in participant_ids:
+            player_data = participant["player"]
+            if player_data["summonerName"] is summoner_name:
+                part_ID = participant["participantId"]
+
+        # Check what participant got first blood and see if that matches w/ the participant id for entered summoner
+        for participant in participant_data:
+            test_id = participant["participantId"]
+            if test_id == part_ID:
+                # Check for first blood
+                stats = participant["stats"]
+                did_first_blood = stats["firstBloodKill"]
+                if did_first_blood:
+                    num_first_bloods += 1
+
+        counter += 1
+
+    return num_first_bloods
+
 
 # Start of Program Logic
 # TODO: Put in API Key manually, will keep in this string version for testing purposes
@@ -82,3 +129,6 @@ summID = getSummonerID(summoner_name)
 
 # Gather the summoner's matchlist to parse through
 match_ids = getMatchIDList(summID)
+num_first_bloods = getFirstBloodData(summoner_name, match_ids)
+
+print(summoner_name + " has gotten " + str(num_first_bloods) + " first bloods in their __ games")
