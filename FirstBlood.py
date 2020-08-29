@@ -27,6 +27,7 @@ def makeRequest(stringRequest):
         # Check for issues with the response code
         if response.status_code != 200:
             if response.status_code == 400:
+                # Checks for the specific response code that too many requests have been made
                 time.sleep(5)
                 makeRequest(stringRequest)
             else:
@@ -43,13 +44,15 @@ def makeRequest(stringRequest):
 
 def getSummonerID(summonerName):
     # Get all of a Summoner's JSON data
-    url = ""
+    url = RIOT_WEBSITE + "/lol/summoner/v4/summoners/by-name/" + summonerName + "?api_key=" + api_key
     summoner_data = makeRequest(url)
 
     # Parse the data and find the account ID
+    datas = json.loads(summoner_data.text)
+    summID = datas["accountId"]
 
-
-    return
+    # Return the account ID
+    return summID
 
 
 def getMatchList(summonerID):
@@ -64,6 +67,8 @@ def getPatchNumber():
 # TODO: Put in API Key manually, will keep in this string version for testing purposes
 api_key = "RGAPI-caa14093-8bba-47c7-b82c-7eb65f2074f1"
 
-
+# Get the wanted summoner name, and then start gathering specific data
 summoner_name = input("Summoner Name: ")
-summ_ID = getSummonerID(summoner_name)
+summID = getSummonerID(summoner_name)
+
+# Gather the summoner's matchlist to parse through
