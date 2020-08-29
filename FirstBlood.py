@@ -3,10 +3,15 @@ import json
 import requests
 import time
 
-# Classes
-class RequestError:
-    except_string = "Request Error"
+# Important constants
+RIOT_WEBSITE = "https://na1.api.riotgames.com"
+STATIC_WEBSITE = "http://static.developer.riotgames.com"
 
+
+# Classes
+class RequestError(Exception):
+    """Raised when an error comes up with a request"""
+    pass
 
 
 # Functions
@@ -19,15 +24,21 @@ def makeRequest(stringRequest):
     try:
         response = requests.get(stringRequest)
 
+        # Check for issues with the response code
         if response.status_code != 200:
-            raise RequestError
+            if response.status_code == 400:
+                time.sleep(5)
+                makeRequest(stringRequest)
+            else:
+                raise RequestError
+
     except RequestError as error:
-        print("An exception occurred.\n")
-        time.sleep(5)
+        print("Issue with response code.\n")
     else:
+        # Sleep for a second to avoid issues
         time.sleep(0.5)
 
-    return
+    return response
 
 
 def getSummonerID(summonerName):
@@ -45,9 +56,12 @@ def getMatchList(summonerID):
     return
 
 
+def getPatchNumber():
+    return
 
 
 # Start of Program Logic
+# TODO: Put in API Key manually, will keep in this string version for testing purposes
 api_key = "RGAPI-caa14093-8bba-47c7-b82c-7eb65f2074f1"
 
 
