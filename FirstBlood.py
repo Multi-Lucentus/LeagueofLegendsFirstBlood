@@ -26,12 +26,13 @@ def makeRequest(stringRequest):
         # Check for issues with the response code
         if response.status_code != 200:
             if response.status_code == 400:
+                time.sleep(5)
                 makeRequest(stringRequest)
             else:
                 raise RequestError
 
     except RequestError as error:
-        print("Issue with response code.\n")
+        print("Issue with response code: " + str(response.status_code) + "\n")
     else:
         # Sleep for a second to avoid issues
         time.sleep(0.5)
@@ -113,6 +114,7 @@ def getFirstBloodData(summoner_name, matchlist):
         print("\tParticipant ID: " + str(part_ID))
 
         # Check what participant got first blood and see if that matches w/ the participant id for entered summoner
+        # TODO: Check if enemy laner was the one to get first blood
         for participant in participant_data:
             test_id = participant["participantId"]
             if test_id == part_ID:
@@ -136,10 +138,13 @@ api_key = "RGAPI-caa14093-8bba-47c7-b82c-7eb65f2074f1"
 
 # Get the wanted summoner name, and then start gathering specific data
 summoner_name = input("Summoner Name: ")
+
+#TODO: Check if summoner name has any spaces and fix
+
 summID = getSummonerID(summoner_name)
 
 # Gather the summoner's matchlist to parse through
 match_ids = getMatchIDList(summID)
 num_first_bloods = getFirstBloodData(summoner_name, match_ids)
 
-print(summoner_name + " has gotten " + str(num_first_bloods) + " first bloods in their __ games")
+print(summoner_name + " has gotten " + str(num_first_bloods) + " first bloods in their last" + str(len(match_ids)) + "games")
