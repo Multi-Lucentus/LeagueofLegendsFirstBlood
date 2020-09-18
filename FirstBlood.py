@@ -133,13 +133,14 @@ def getFirstBloodData(summoner_name, matchlist):
 
 
 # Start of Program Logic
-# TODO: Put in API Key manually, will keep in this string version for testing purposes
-api_key = "RGAPI-caa14093-8bba-47c7-b82c-7eb65f2074f1"
 
 # Get the wanted summoner name, and then start gathering specific data
 summoner_name = input("Summoner Name: ")
 
 #TODO: Check if summoner name has any spaces and fix
+
+# Get API KEY manually from the command line
+api_key = input('Riot API Key: ')
 
 summID = getSummonerID(summoner_name)
 
